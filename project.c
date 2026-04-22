@@ -5,19 +5,48 @@
 /* 10 Points */
 void ALU(unsigned A,unsigned B,char ALUControl,unsigned *ALUresult,char *Zero)
 {
+    // Recieves decoded instruction from control, ALUControl is your instruction
+    // A and B represent rt, rd for R-type or rt, constant for I-type
+    // ALUresult is rs
+    // it is the responsibility of an instruction function to split the R-type I-type and J-type
+    // instructions into A and B for this function.
+    // if ALUresult is zero then Zero must be set to 1?
+    /*
+    add
+    R-type
+    
+    sub
+    addi
+    and
+    or
+    lw
+    sw
+    lui
+    beq
+    slt
+    slti
+    sltu
+    sltiu
+    j
+
+    */ 
+     
+
 
 }
 
 /* instruction fetch */
 /* 10 Points */
 int instruction_fetch(unsigned PC,unsigned *Mem,unsigned *instruction)
-{
-	if (PC & 0x3)
+{   // Halt if either of the first two bits are 1, as this indicates that PC is not word aligned.
+	if (PC & 0x3) 
 		return 1;
 
+    // Halt if PC exceeds 64k bytes
 	if (PC > 0xFFFF)
 		return 1;
 
+    // right shifting returns the decimal value for the instruction
 	*instruction = Mem[PC >> 2];
 	return 0;
 }
@@ -27,7 +56,16 @@ int instruction_fetch(unsigned PC,unsigned *Mem,unsigned *instruction)
 /* 10 Points */
 void instruction_partition(unsigned instruction, unsigned *op, unsigned *r1,unsigned *r2, unsigned *r3, unsigned *funct, unsigned *offset, unsigned *jsec)
 {
+    // as instructions are fed in as decimals they must be converted to hex or binary
+// unsigned op,	// instruction [31-26]
+// 	r1,	// instruction [25-21]
+// 	r2,	// instruction [20-16]
+// 	r3,	// instruction [15-11]
+// 	funct,	// instruction [5-0]
+// 	offset,	// instruction [15-0]
+// 	jsec;	// instruction [25-0]
 
+    printf("The given instruction is: %u", instruction);
 }
 
 
