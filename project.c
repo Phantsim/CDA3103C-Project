@@ -92,13 +92,20 @@ int instruction_fetch(unsigned PC,unsigned *Mem,unsigned *instruction)
 /* 10 Points */
 void instruction_partition(unsigned instruction, unsigned *op, unsigned *r1,unsigned *r2, unsigned *r3, unsigned *funct, unsigned *offset, unsigned *jsec)
 {
+    unsigned rs[5];
+    unsigned rt[5];
+    unsigned rd[5];
+    unsigned iConstant[16];
+    unsigned address[26];
+    unsigned shamt[5];
+    unsigned functa[6];
     // as instructions are fed in as decimals they must be converted to binary
-    unsigned *binaryArray = decToBinaryArray(instruction);
+    unsigned *instructionArray = decToBinaryArray(instruction);
 
     //obtain OP code and define instruction format
     unsigned opArray[6];
     for (int i = 0; i < 6; i++) {
-        opArray[i] = binaryArray[i];
+        opArray[i] = instructionArray[i];
         // printf("%d", opArray[i]);
     }
 
@@ -108,10 +115,56 @@ void instruction_partition(unsigned instruction, unsigned *op, unsigned *r1,unsi
     // < 3 : i-type
     // an op of 1 is not defined for our assignment, not sure how to handle it.
 
+    char instructionType;
+    if (*op > 3)
+        instructionType = 'I';
+    else if (*op > 1)
+        instructionType = 'J';
+    else
+        instructionType = 'R';
 
-    
-    // print opCode in decimal
-    // printf("\n%u\n", *op);
+    switch (instructionType) {
+        case 'I':
+            // 6op 5rs 5rt 16constant/address
+            for (int i = 0; i < 5; i++) {
+                rs[i] = instructionArray[i+6];
+                rt[i] = instructionArray[i+11];
+            }
+            for (int i = 0; i < 16; i++) 
+                iConstant[i] = instructionArray[i+16];
+
+            *r1 = binaryToDecimal(rs, 5);
+            *r2 = binaryToDecimal(rt, 5);
+            *r3 = binaryToDecimal(iConstant, 16);
+            break;
+        case 'J':
+            // 6op 26address
+            for (int i = 0; i < 26; i++) 
+                address[i] = instructionArray[i+6];
+
+            *jsec = binaryToDecimal(address, 26);
+            break;
+        case 'R':
+            // 6op 5rs 5rt 5rd 5shamt 6funct
+            for (int i = 0; i < 5; i++) {
+                rs[i] = instructionArray[i+6];
+                rt[i] = instructionArray[i+11];
+                rd[i] = instructionArray[i+16];
+                shamt[i] = instructionArray[i+21];
+            }
+            for (int i = 0; i < 6; i++) 
+                funct[i] = instructionArray[i+26];
+
+            *r1 = binaryToDecimal(rs, 5);
+            *r2 = binaryToDecimal(rt, 5);
+            *r3 = binaryToDecimal(rd, 5);
+            *shamt = binaryToDecimal(shamt, 5);
+            *funct = binaryToDecimal(funct, 6);
+            break;
+    }
+
+    // print instruction in partitioned decimal format
+    // printf("%d %d %d %d",*op, *r1, *r2, *r3);
 
     // print binary instruction
     // for (int i = 0; i < 32; i++)
@@ -119,19 +172,6 @@ void instruction_partition(unsigned instruction, unsigned *op, unsigned *r1,unsi
 
     // prints decimal instruction
     // printf("%u\n", instruction); 
-
-// unsigned op,	// instruction [31-26]
-// 	r1,	// instruction [25-21]
-// 	r2,	// instruction [20-16]
-// 	r3,	// instruction [15-11]
-// 	funct,	// instruction [5-0]
-// 	offset,	// instruction [15-0]
-// 	jsec;	// instruction [25-0]
-
-
-
-    
-
 }
 
 
