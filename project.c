@@ -1,5 +1,26 @@
 #include "spimcore.h"
 
+// Takes instructions in decimal and outputs an array representing the 32bit instruction
+unsigned *decToBinaryArray(unsigned decimalNum)
+{
+    unsigned tempArray[1000];
+    unsigned *binaryArray;
+
+    int i = 0;
+    while (decimalNum > 0) {
+        tempArray[i] = decimalNum % 2;
+        decimalNum = decimalNum / 2;
+        i++;
+    }
+
+    binaryArray = calloc(32, sizeof(unsigned));
+
+    for (int j = i - 1; j >= 0; j--) {
+        binaryArray[i-j+1] = tempArray[j];
+    }
+
+    return binaryArray;
+}
 
 /* ALU */
 /* 10 Points */
@@ -56,7 +77,16 @@ int instruction_fetch(unsigned PC,unsigned *Mem,unsigned *instruction)
 /* 10 Points */
 void instruction_partition(unsigned instruction, unsigned *op, unsigned *r1,unsigned *r2, unsigned *r3, unsigned *funct, unsigned *offset, unsigned *jsec)
 {
-    // as instructions are fed in as decimals they must be converted to hex or binary
+    // as instructions are fed in as decimals they must be converted to binary
+    unsigned *binaryArray = decToBinaryArray(instruction);
+
+    // print binary instruction
+    // for (int i = 0; i < 32; i++)
+    //     printf("%d", binaryArray[i]);
+
+    // prints decimal instruction
+    // printf("%d\n", instruction); 
+
 // unsigned op,	// instruction [31-26]
 // 	r1,	// instruction [25-21]
 // 	r2,	// instruction [20-16]
@@ -65,7 +95,10 @@ void instruction_partition(unsigned instruction, unsigned *op, unsigned *r1,unsi
 // 	offset,	// instruction [15-0]
 // 	jsec;	// instruction [25-0]
 
-    printf("The given instruction is: %u", instruction);
+
+
+    
+
 }
 
 
