@@ -22,6 +22,21 @@ unsigned *decToBinaryArray(unsigned decimalNum)
     return binaryArray;
 }
 
+unsigned binaryToDecimal(unsigned *binary, int length) {
+    unsigned dec = 0;
+    unsigned base = 1;
+    
+    for (int i = length - 1; i >= 0; i--) {
+        if (binary[i] == 1) {
+            dec += base;
+        }
+
+        base = base * 2;
+    }
+    
+    return dec;
+}
+
 /* ALU */
 /* 10 Points */
 void ALU(unsigned A,unsigned B,char ALUControl,unsigned *ALUresult,char *Zero)
@@ -80,12 +95,30 @@ void instruction_partition(unsigned instruction, unsigned *op, unsigned *r1,unsi
     // as instructions are fed in as decimals they must be converted to binary
     unsigned *binaryArray = decToBinaryArray(instruction);
 
+    //obtain OP code and define instruction format
+    unsigned opArray[6];
+    for (int i = 0; i < 6; i++) {
+        opArray[i] = binaryArray[i];
+        // printf("%d", opArray[i]);
+    }
+
+    *op = binaryToDecimal(opArray, 6);
+    // 0 : r-type
+    // 2-3 : j-type
+    // < 3 : i-type
+    // an op of 1 is not defined for our assignment, not sure how to handle it.
+
+
+    
+    // print opCode in decimal
+    // printf("\n%u\n", *op);
+
     // print binary instruction
     // for (int i = 0; i < 32; i++)
-    //     printf("%d", binaryArray[i]);
+    //     printf("%u", binaryArray[i]);
 
     // prints decimal instruction
-    // printf("%d\n", instruction); 
+    // printf("%u\n", instruction); 
 
 // unsigned op,	// instruction [31-26]
 // 	r1,	// instruction [25-21]
