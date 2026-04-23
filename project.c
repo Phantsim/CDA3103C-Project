@@ -41,32 +41,46 @@ unsigned binaryToDecimal(unsigned *binary, int length) {
 /* 10 Points */
 void ALU(unsigned A,unsigned B,char ALUControl,unsigned *ALUresult,char *Zero)
 {
-    // Recieves decoded instruction from control, ALUControl is your instruction
-    // A and B represent rt, rd for R-type or rt, constant for I-type
-    // ALUresult is rs
+    // Recieves decoded instruction from ALU_operations, ALUControl is your instruction
     // it is the responsibility of an instruction function to split the R-type I-type and J-type
     // instructions into A and B for this function.
-    // if ALUresult is zero then Zero must be set to 1?
+    // if ALUresult is zero then Zero must be set to 1
     /*
-    add
-    R-type
-    
-    sub
-    addi
-    and
-    or
-    lw
-    sw
-    lui
-    beq
-    slt
-    slti
-    sltu
-    sltiu
-    j
-
+    000 0 - add, addi, lw, sw, j
+    001 1 - sub, beq
+    010 2 - slt, slti
+    011 3 - sltu
+    100 4 - and
+    101 5 - or
+    110 6 - lui
+    111 7 - not sure if needed for the assignment
     */ 
+    // Unsure if slt, slti, and sltu are exactly the same. However this merges them to the same case
+    if (ALUControl == 3) ALUControl = 2; 
      
+    switch (ALUControl) {
+        case 0:
+            *ALUresult = A + B;
+            break;
+        case 1:
+            *ALUresult = A - B;
+            break;
+        case 2:
+            if (A < B) 
+                *ALUresult = 1;
+            else
+                *ALUresult = 0;
+            break;
+        case 4:
+            *ALUresult = A & B;
+            break;
+        case 5:
+            *ALUresult = A || B;
+            break;
+        case 6:
+            *ALUresult = B << 16;
+            break;
+    }
 
 
 }
@@ -303,6 +317,7 @@ int ALU_operations(unsigned data1,unsigned data2,unsigned extended_value,unsigne
     ALU(data1, data2, ALUControl, ALUresult, Zero);
 
     //TODO fault conditions
+    //TODO Change data1 or data2 to comply with ALUSrc
 }
 
 /* Read / Write Memory */
