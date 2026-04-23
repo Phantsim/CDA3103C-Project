@@ -297,7 +297,12 @@ int ALU_operations(unsigned data1,unsigned data2,unsigned extended_value,unsigne
                 ALUControl = '3';
                 break;
         }
+
+    if (extended_value) data2 = extended_value;
+
     ALU(data1, data2, ALUControl, ALUresult, Zero);
+
+    //TODO fault conditions
 }
 
 /* Read / Write Memory */
