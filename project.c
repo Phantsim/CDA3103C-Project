@@ -197,9 +197,36 @@ int instruction_decode(unsigned op,struct_controls *controls)
     // slti 001010 10 010
     // sltu 000000 0 111
     // j 000010 2 000 | dont care
-    // controls->ALUOp = '111';
 
-    
+    switch (op) {
+        case 0:
+            controls->ALUOp = '7';
+            break;
+        case 8:
+            controls->ALUOp = '0';
+            break;
+        case 35:
+            controls->ALUOp = '0';
+            controls->MemRead = '1';
+            break;
+        case 43:
+            controls->ALUOp = '0';
+            controls->MemWrite = '1';
+            break;
+        case 15:
+            controls->ALUOp = '6';
+            controls->RegWrite = '1';
+            break;
+        case 4:
+            controls->ALUOp = '1';
+            break;
+        case 10:
+            controls->ALUOp = '2';
+            break;
+        case 2:
+            controls->ALUOp = '0';
+            break;
+    }
     
 }
 
