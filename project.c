@@ -262,7 +262,23 @@ int ALU_operations(unsigned data1,unsigned data2,unsigned extended_value,unsigne
 /* 10 Points */
 int rw_memory(unsigned ALUresult,unsigned data2,char MemWrite,char MemRead,unsigned *memdata,unsigned *Mem)
 {
-    
+    if(MemRead == 1){ // reading from memory on
+        if(ALUresult % 4 == 0){ // check if ALUresult is word-aligned
+            *memdata = Mem[ALUresult >> 2]; // right bitshift by 2 to get the word-aligned index
+        }
+    } else {
+        return 1; // halt due to not being word-aligned
+    }
+
+    if(MemWrite == 1){ // writing from memory
+        if(ALUresult % 4 == 0){ 
+            Mem[ALUresult >> 2] = data2; 
+        } else {
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 
