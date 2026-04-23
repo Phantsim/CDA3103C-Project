@@ -81,7 +81,7 @@ void ALU(unsigned A,unsigned B,char ALUControl,unsigned *ALUresult,char *Zero)
             *ALUresult = B << 16;
             break;
     }
-
+    *Zero = (*ALUresult == 0);
 
 }
 
