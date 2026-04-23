@@ -162,6 +162,7 @@ void instruction_partition(unsigned instruction, unsigned *op, unsigned *r1,unsi
             *funct = binaryToDecimal(funct, 6);
             break;
     }
+    free(instructionArray);
 
     // print instruction in partitioned decimal format
     // printf("%d %d %d %d",*op, *r1, *r2, *r3);
@@ -180,7 +181,26 @@ void instruction_partition(unsigned instruction, unsigned *op, unsigned *r1,unsi
 /* 15 Points */
 int instruction_decode(unsigned op,struct_controls *controls)
 {
+    // assign values to controls off op code
+    // all instructions by 
+    // name, binary, decimal, control value
+    // add 000000 0 111
+    // sub 000000 0 111
+    // addi 001000 8 000
+    // and 000000 0 111 
+    // or 000000 0 111
+    // lw 100011 35 000 | addition is used to add the offset to the address
+    // sw 101011 43 000 | addition is used to add the offset to the address
+    // lui 001111 15 110
+    // beq 000100 4 001 | subtraction as x - y == 0 determines equality
+    // slt 000000 0 111
+    // slti 001010 10 010
+    // sltu 000000 0 111
+    // j 000010 2 000 | dont care
+    // controls->ALUOp = '111';
 
+    
+    
 }
 
 /* Read Register */
