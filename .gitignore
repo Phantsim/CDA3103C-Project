@@ -3,3 +3,5 @@ input_file.asc
 test_results.txt
 spimcore.h
 spimcore.c
+.vscode
+.spimcore
