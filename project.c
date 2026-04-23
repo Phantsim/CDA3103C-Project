@@ -234,6 +234,7 @@ int instruction_decode(unsigned op,struct_controls *controls)
 /* 5 Points */
 void read_register(unsigned r1,unsigned r2,unsigned *Reg,unsigned *data1,unsigned *data2)
 {
+    // assign data parameters using data addressed from r1 and r2
 	*data1 = Reg[r1];
 	*data2 = Reg[r2];
 }
@@ -243,10 +244,10 @@ void read_register(unsigned r1,unsigned r2,unsigned *Reg,unsigned *data1,unsigne
 /* 10 Points */
 void sign_extend(unsigned offset,unsigned *extended_value)
 {
-	if((offset >> 15) == 1){
-		*extended_value = offset | 0xffff0000;
+	if((offset >> 15) == 1){ // check if sign bit is negative
+		*extended_value = offset | 0xffff0000; // pad to the left with 1s if it's negative
 	} else {
-		*extended_value = offset & 0x0000ffff;
+		*extended_value = offset & 0x0000ffff; // pad to the right with 1s if it's positive
 	}
 }
 
@@ -261,7 +262,7 @@ int ALU_operations(unsigned data1,unsigned data2,unsigned extended_value,unsigne
 /* 10 Points */
 int rw_memory(unsigned ALUresult,unsigned data2,char MemWrite,char MemRead,unsigned *memdata,unsigned *Mem)
 {
-
+    
 }
 
 
@@ -269,17 +270,17 @@ int rw_memory(unsigned ALUresult,unsigned data2,char MemWrite,char MemRead,unsig
 /* 10 Points */
 void write_register(unsigned r2,unsigned r3,unsigned memdata,unsigned ALUresult,char RegWrite,char RegDst,char MemtoReg,unsigned *Reg)
 {
-	if(RegWrite==1){
+	if(RegWrite==1){ // write to register
 		if(MemtoReg==1&&RegDst==0){
-			Reg[r2] = memdata;
+			Reg[r2] = memdata; // write to address in r2
 		} else if(MemtoReg==1&&RegDst==1){
-			Reg[r3] = memdata;
+			Reg[r3] = memdata; // write to address in r3
 		}
 	}
 
 	if(RegWrite==0){
-		if(MemtoReg==0&&RegDst==0){
-			Reg[r2] = ALUresult;
+		if(MemtoReg==0&&RegDst==0){ // use ALUresult instead
+			Reg[r2] = ALUresult; 
 		} else if(MemtoReg==0&&RegDst==1){
 			Reg[r3] = ALUresult;
 		}
