@@ -201,30 +201,42 @@ int instruction_decode(unsigned op,struct_controls *controls)
     switch (op) {
         case 0:
             controls->ALUOp = '7';
+            controls->ALUSrc = '2';
             break;
         case 8:
             controls->ALUOp = '0';
+            controls->ALUSrc = '0';
             break;
         case 35:
             controls->ALUOp = '0';
+            controls->ALUSrc = '0';
             controls->MemRead = '1';
+            controls->RegWrite = '1';
             break;
         case 43:
             controls->ALUOp = '0';
+            controls->ALUSrc = '0';
             controls->MemWrite = '1';
             break;
         case 15:
             controls->ALUOp = '6';
+            controls->ALUSrc = '0';
             controls->RegWrite = '1';
             break;
         case 4:
             controls->ALUOp = '1';
+            controls->ALUSrc = '2';
+            controls->Branch = '1';
             break;
         case 10:
             controls->ALUOp = '2';
+            controls->ALUSrc = '0';
             break;
         case 2:
             controls->ALUOp = '0';
+            controls->ALUSrc = '2';
+            controls->Jump = '1';
+            controls->Branch = '1';
             break;
     }
     
