@@ -55,29 +55,28 @@ void ALU(unsigned A,unsigned B,char ALUControl,unsigned *ALUresult,char *Zero)
     110 6 - lui
     111 7 - not sure if needed for the assignment
     */ 
-    // Unsure if slt, slti, and sltu are exactly the same. However this merges them to the same case
-    if (ALUControl == 3) ALUControl = 2; 
-     
+    *ALUresult = 0;
+
     switch (ALUControl) {
-        case 0:
+        case '0':
             *ALUresult = A + B;
             break;
-        case 1:
+        case '1':
             *ALUresult = A - B;
             break;
-        case 2:
+        case '2':
             if (A < B) 
                 *ALUresult = 1;
             else
                 *ALUresult = 0;
             break;
-        case 4:
+        case '4':
             *ALUresult = A & B;
             break;
-        case 5:
-            *ALUresult = A || B;
+        case '5':
+            *ALUresult = A | B;
             break;
-        case 6:
+        case '6':
             *ALUresult = B << 16;
             break;
     }
@@ -113,8 +112,11 @@ void instruction_partition(unsigned instruction, unsigned *op, unsigned *r1,unsi
     unsigned address[26];
     unsigned shamt[5];
     unsigned functa[6];
-    // as instructions are fed in as decimals they must be converted to binary
-    unsigned *instructionArray = decToBinaryArray(instruction);
+    unsigned instructionArray[32];
+
+    // convert instruction to binary array for easier partitioning
+    for (int i = 0; i < 32; i++)
+        instructionArray[i] = (instruction >> (31 - i)) & 1;
 
     //obtain OP code and define instruction format
     unsigned opArray[6];
@@ -130,12 +132,19 @@ void instruction_partition(unsigned instruction, unsigned *op, unsigned *r1,unsi
     // an op of 1 is not defined for our assignment, not sure how to handle it.
 
     char instructionType;
-    if (*op > 3)
-        instructionType = 'I';
-    else if (*op > 1)
+    if (*op == 0)
+        instructionType = 'R';
+    else if (*op == 2 || *op == 3)
         instructionType = 'J';
     else
-        instructionType = 'R';
+        instructionType = 'I';
+
+    *r1 = 0;
+    *r2 = 0;
+    *r3 = 0;
+    *funct = 0;
+    *offset = 0;
+    *jsec = 0;
 
     switch (instructionType) {
         case 'I':
@@ -149,7 +158,7 @@ void instruction_partition(unsigned instruction, unsigned *op, unsigned *r1,unsi
 
             *r1 = binaryToDecimal(rs, 5);
             *r2 = binaryToDecimal(rt, 5);
-            *r3 = binaryToDecimal(iConstant, 16);
+            *offset = binaryToDecimal(iConstant, 16);
             break;
         case 'J':
             // 6op 26address
@@ -167,16 +176,14 @@ void instruction_partition(unsigned instruction, unsigned *op, unsigned *r1,unsi
                 shamt[i] = instructionArray[i+21];
             }
             for (int i = 0; i < 6; i++) 
-                funct[i] = instructionArray[i+26];
+                functa[i] = instructionArray[i+26];
 
             *r1 = binaryToDecimal(rs, 5);
             *r2 = binaryToDecimal(rt, 5);
             *r3 = binaryToDecimal(rd, 5);
-            *shamt = binaryToDecimal(shamt, 5);
-            *funct = binaryToDecimal(funct, 6);
+            *funct = binaryToDecimal(functa, 6);
             break;
     }
-    free(instructionArray);
 
     // print instruction in partitioned decimal format
     // printf("%d %d %d %d",*op, *r1, *r2, *r3);
@@ -186,7 +193,7 @@ void instruction_partition(unsigned instruction, unsigned *op, unsigned *r1,unsi
     //     printf("%u", binaryArray[i]);
 
     // prints decimal instruction
-    // printf("%u\n", instruction); 
+    // printf("%u\n", instruction);
 }
 
 
@@ -212,46 +219,60 @@ int instruction_decode(unsigned op,struct_controls *controls)
     // sltu 000000 0 111 101011 43 011
     // j 000010 2 000 | dont care
 
+    controls->RegDst = '0';
+    controls->Jump = '0';
+    controls->Branch = '0';
+    controls->MemRead = '0';
+    controls->MemtoReg = '0';
+    controls->ALUOp = '0';
+    controls->MemWrite = '0';
+    controls->ALUSrc = '0';
+    controls->RegWrite = '0';
+
     switch (op) {
-        case 0:
+        case 0:   
+            controls->RegDst = '1';
             controls->ALUOp = '7';
-            controls->ALUSrc = '2';
-            break;
-        case 8:
-            controls->ALUOp = '0';
-            controls->ALUSrc = '0';
-            break;
-        case 35:
-            controls->ALUOp = '0';
-            controls->ALUSrc = '0';
-            controls->MemRead = '1';
             controls->RegWrite = '1';
             break;
-        case 43:
-            controls->ALUOp = '0';
-            controls->ALUSrc = '0';
+        case 8:   
+            controls->ALUSrc = '1';
+            controls->RegWrite = '1';
+            break;
+        case 35:  
+            controls->ALUSrc = '1';
+            controls->MemRead = '1';
+            controls->MemtoReg = '1';
+            controls->RegWrite = '1';
+            break;
+        case 43:  
+            controls->ALUSrc = '1';
             controls->MemWrite = '1';
             break;
-        case 15:
+        case 15:  
+            controls->ALUSrc = '1';
             controls->ALUOp = '6';
-            controls->ALUSrc = '0';
             controls->RegWrite = '1';
             break;
-        case 4:
+        case 4:   
             controls->ALUOp = '1';
-            controls->ALUSrc = '2';
             controls->Branch = '1';
             break;
-        case 10:
+        case 10:  
+            controls->ALUSrc = '1';
             controls->ALUOp = '2';
-            controls->ALUSrc = '0';
+            controls->RegWrite = '1';
             break;
-        case 2:
-            controls->ALUOp = '0';
-            controls->ALUSrc = '2';
+        case 11:  
+            controls->ALUSrc = '1';
+            controls->ALUOp = '3';
+            controls->RegWrite = '1';
+            break;
+        case 2:   
             controls->Jump = '1';
-            controls->Branch = '1';
             break;
+        default:
+            return 1;
     }
 
     return 0;
@@ -262,7 +283,7 @@ int instruction_decode(unsigned op,struct_controls *controls)
 void read_register(unsigned r1,unsigned r2,unsigned *Reg,unsigned *data1,unsigned *data2)
 {
     // assign data parameters using data addressed from r1 and r2
-	*data1 = Reg[r1];
+	*data1 = Reg[r1]; 
 	*data2 = Reg[r2];
 }
 
@@ -311,34 +332,37 @@ int ALU_operations(unsigned data1,unsigned data2,unsigned extended_value,unsigne
             case 43:
                 ALUControl = '3';
                 break;
+            default:
+                return 1;
         }
 
-    if (extended_value) data2 = extended_value;
+    if (ALUSrc == '1')
+        data2 = extended_value;
 
     ALU(data1, data2, ALUControl, ALUresult, Zero);
 
     //TODO fault conditions
     //TODO Change data1 or data2 to comply with ALUSrc
+
+    return 0;
 }
 
 /* Read / Write Memory */
 /* 10 Points */
 int rw_memory(unsigned ALUresult,unsigned data2,char MemWrite,char MemRead,unsigned *memdata,unsigned *Mem)
 {
-    if(MemRead == 1){ // reading from memory on
-        if(ALUresult % 4 == 0){ // check if ALUresult is word-aligned
-            *memdata = Mem[ALUresult >> 2]; // right bitshift by 2 to get the word-aligned index
-        }
-    } else {
-        return 1; // halt due to not being word-aligned
+    if(MemRead == '1'){ // reading from memory on
+        if(ALUresult % 4 != 0)
+            return 1;
+
+        *memdata = Mem[ALUresult >> 2]; // right bitshift by 2 to get the word-aligned index
     }
 
-    if(MemWrite == 1){ // writing from memory
-        if(ALUresult % 4 == 0){ 
-            Mem[ALUresult >> 2] = data2; 
-        } else {
+    if(MemWrite == '1'){ // writing from memory
+        if(ALUresult % 4 != 0)
             return 1;
-        }
+
+        Mem[ALUresult >> 2] = data2;
     }
 
     return 0;
@@ -349,21 +373,16 @@ int rw_memory(unsigned ALUresult,unsigned data2,char MemWrite,char MemRead,unsig
 /* 10 Points */
 void write_register(unsigned r2,unsigned r3,unsigned memdata,unsigned ALUresult,char RegWrite,char RegDst,char MemtoReg,unsigned *Reg)
 {
-	if(RegWrite==1){ // write to register
-		if(MemtoReg==1&&RegDst==0){
-			Reg[r2] = memdata; // write to address in r2
-		} else if(MemtoReg==1&&RegDst==1){
-			Reg[r3] = memdata; // write to address in r3
-		}
-	}
+    unsigned dest;
 
-	if(RegWrite==0){
-		if(MemtoReg==0&&RegDst==0){ // use ALUresult instead
-			Reg[r2] = ALUresult; 
-		} else if(MemtoReg==0&&RegDst==1){
-			Reg[r3] = ALUresult;
-		}
-	}
+    if(RegWrite != '1')
+        return;
+
+    dest = (RegDst == '1') ? r3 : r2;
+    if(dest == 0)
+        return;
+
+    Reg[dest] = (MemtoReg == '1') ? memdata : ALUresult;
 }
 
 /* PC update */
@@ -373,10 +392,10 @@ void PC_update(unsigned jsec,unsigned extended_value,char Branch,char Jump,char 
 	unsigned pc_plus_4 = *PC + 4;
 	unsigned pc_next = pc_plus_4;
 
-	if (Branch && Zero)
+    if (Branch == '1' && Zero)
 		pc_next = pc_plus_4 + (extended_value << 2);
 
-	if (Jump)
+    if (Jump == '1')
 		pc_next = (pc_plus_4 & 0xF0000000) | (jsec << 2);
 
 	*PC = pc_next;
